@@ -1,0 +1,30 @@
+{
+  "name": "copytrading-agent",
+  "version": "1.0.0",
+  "description": "Hyperliquid copy trading agent",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "start": "node --enable-source-maps dist/index.js",
+    "dev": "ts-node --esm src/index.ts",
+    "test": "node --test --loader ts-node/esm tests/**/*.test.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@nktkas/hyperliquid": "^0.25.4",
+    "viem": "^2.38.3",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "@types/ws": "^8.18.1",
+    "eslint": "^9.38.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@9.12.0+sha512.4abf725084d7bcbafbd728bfc7bee61f2f791f977fd87542b3579dcb23504d170d46337945e4c66485cd12d588a0c0e570ed9c477e7ccdd8507cf05f3f92eaca"
+}
