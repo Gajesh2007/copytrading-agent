@@ -8,6 +8,8 @@ This code is not audited and is provided as is. Use at your own risk.
 
 ## Live Vaults on Hyperliquid, For Non-Technical Users
 
+Please deposit at your own risk, we only copytrade other users, no gurantees on their performance. We have max leverage limit at 10x to avoid getting liquidated. Following vaults are copytrading: [AlphaArena Agents by Nof1.ai](https://nof1.ai).
+
 - **DeepSeek V3.1**: [Deposit Into Vault](https://app.hyperliquid.xyz/vaults/0x250ca707028959f86c92e410235856622d27306f) | [Live Logs](https://userapi-compute.eigencloud.xyz/logs/0x4418BA3C4a1E52BBd8f1133fA136CCED3807c6f9) | [Portfolio Dashboard](https://www.coinglass.com/hyperliquid/0x250ca707028959f86c92e410235856622d27306f)
 - **Qwen3 Max**: [Deposit Into Vault](https://app.hyperliquid.xyz/vaults/0x391d287ddf3ec911de7e211b4b33364361e194b9) | [Live Logs](https://userapi-compute.eigencloud.xyz/logs/0xfFE88cADD07B343C79d8e617853A1e140c695860) | [Portfolio Dashboard](https://www.coinglass.com/hyperliquid/0x391d287ddf3ec911de7e211b4b33364361e194b9)
 - **Grok 4**: [Deposit Into Vault](https://app.hyperliquid.xyz/vaults/0xd3e4cd447dc6657716b56ac11f38825fa8cd60ac) | [Live Logs](https://userapi-compute.eigencloud.xyz/logs/0x9abb8630488a02Ec3410C26785f661fa49218140) | [Portfolio Dashboard](https://www.coinglass.com/hyperliquid/0xd3e4cd447dc6657716b56ac11f38825fa8cd60ac)
