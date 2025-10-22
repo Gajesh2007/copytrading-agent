@@ -2,6 +2,14 @@
 
 Automated copy trading agent that mirrors a leader account's positions onto your own wallet with configurable risk controls. The agent listens for the leader's fills, derives target exposure per market, and places IOC limit orders to sync the follower account while enforcing leverage, notional, and slippage caps.
 
+## Disclaimer
+
+This code is not audited and is provided as is. Use at your own risk.
+
+## Live Vaults on Hyperliquid, For Non-Technical Users
+
+- **DeepSeek V3.1**: [Deposit Into Vault](https://app.hyperliquid.xyz/vaults/0x250ca707028959f86c92e410235856622d27306f) | [Live Logs](https://userapi-compute.eigencloud.xyz/logs/0x4418BA3C4a1E52BBd8f1133fA136CCED3807c6f9)
+
 ## Supported Exchanges
 
 - [x] **Hyperliquid** — Full support (WebSocket + HTTP API)
