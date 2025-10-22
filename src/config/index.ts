@@ -12,11 +12,19 @@ export type HyperliquidEnvironment = "mainnet" | "testnet";
  * Risk management parameters for copy trading.
  */
 export interface RiskConfig {
-  /** Multiplier for position size when copying (e.g., 0.5 = half size, 1.0 = same size) */
+  /** 
+   * Leverage multiplier when copying positions.
+   * - 1.0 = mirror leader's exact leverage ratio
+   * - 0.5 = use half the leader's leverage
+   * - 2.0 = use 2x the leader's leverage
+   * 
+   * Example: If leader uses 5x leverage and copyRatio=0.5, follower uses 2.5x leverage.
+   * This scales positions proportionally to follower's account size.
+   */
   copyRatio: number;
-  /** Maximum leverage allowed for follower positions */
+  /** Maximum leverage allowed for follower positions (hard cap) */
   maxLeverage: number;
-  /** Maximum notional USD value for any single follower position */
+  /** Maximum notional USD value for any single follower position (hard cap) */
   maxNotionalUsd: number;
   /** Maximum slippage in basis points (e.g., 25 = 0.25%) */
   maxSlippageBps: number;

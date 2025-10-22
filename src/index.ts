@@ -13,6 +13,7 @@
  */
 
 import { setTimeout as delay } from "node:timers/promises";
+import * as dotenv from "dotenv";
 import { loadConfig } from "./config/index.js";
 import { createHyperliquidClients } from "./clients/hyperliquid.js";
 import { LeaderState } from "./domain/leaderState.js";
@@ -29,6 +30,8 @@ import { logger } from "./utils/logger.js";
  */
 async function main() {
   try {
+    // Load environment variables from .env if present
+    dotenv.config();
     // Load configuration from environment variables
     const config = loadConfig();
 
@@ -45,6 +48,8 @@ async function main() {
     // Core service that computes deltas and executes follower orders
     const tradeExecutor = new TradeExecutor({
       exchangeClient: clients.exchangeClient,
+      infoClient: clients.infoClient,
+      followerAddress: clients.followerTradingAddress,
       leaderState,
       followerState,
       metadataService,

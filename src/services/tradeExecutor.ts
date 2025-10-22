@@ -20,6 +20,41 @@ import { MarketMetadataService } from "./marketMetadata.js";
 
 /** Minimum absolute position delta to trigger an order (prevents dust trades) */
 const MIN_ABS_DELTA = 1e-6;
+/** Exchange minimum order notional (USD). Override with env MIN_ORDER_NOTIONAL_USD if needed. */
+const MIN_ORDER_NOTIONAL_USD = Number(process.env.MIN_ORDER_NOTIONAL_USD ?? 10);
+
+/**
+ * Determines the number of decimal places in a number's string representation.
+ * Used to match the price precision of the mark price.
+ */
+function getDecimalPlaces(value: number): number {
+  const str = value.toString();
+  const decimalIndex = str.indexOf(".");
+  if (decimalIndex === -1) {
+    return 0;
+  }
+  return str.length - decimalIndex - 1;
+}
+
+/**
+ * Rounds a price to match the precision of a reference price (mark price).
+ * This ensures orders comply with Hyperliquid's tick size requirements.
+ */
+function roundToMarkPricePrecision(price: number, markPrice: number): string {
+  const decimals = getDecimalPlaces(markPrice);
+  const rounded = Number(price.toFixed(decimals));
+  
+  // Format with fixed decimals and strip trailing zeros if any
+  let result = rounded.toFixed(decimals);
+  
+  // Only strip trailing zeros after the decimal point, keep the number valid
+  if (decimals > 0) {
+    result = result.replace(/\.?0+$/, "");
+  }
+  
+  // Ensure we have at least one digit
+  return result || "0";
+}
 
 /**
  * Dependencies for TradeExecutor.
@@ -27,6 +62,10 @@ const MIN_ABS_DELTA = 1e-6;
 interface TradeExecutorDeps {
   /** Hyperliquid exchange client for placing orders */
   exchangeClient: hl.ExchangeClient;
+  /** Hyperliquid info client for fetching account state */
+  infoClient: hl.InfoClient;
+  /** Follower trading address */
+  followerAddress: `0x${string}`;
   /** Leader state store */
   leaderState: LeaderState;
   /** Follower state store */
@@ -72,10 +111,28 @@ export class TradeExecutor {
       await this.deps.metadataService.ensureLoaded();
       await this.deps.metadataService.refreshMarkPrices();
 
-      // Compute what positions the follower should have (scaled from leader)
-      const targets = this.deps.leaderState.computeTargets(this.deps.risk);
+      // CRITICAL: Fetch fresh follower state from exchange before calculating deltas
+      // This prevents stale state causing "reduce only would increase position" errors
+      const followerState = await this.deps.infoClient.clearinghouseState({
+        user: this.deps.followerAddress,
+      });
+      this.deps.followerState.applyClearinghouseState(followerState);
+      this.log.debug("Refreshed follower state before sync");
 
-      // Compute deltas between current and target positions
+      // Compute leader's current leverage for each position
+      const targets = this.deps.leaderState.computeTargets(this.deps.metadataService);
+      
+      if (targets.length > 0) {
+        this.log.debug("Leader positions and leverage", {
+          positions: targets.map((t) => ({
+            coin: t.coin,
+            leverage: t.leaderLeverage.toFixed(2) + "x",
+            markPrice: t.markPrice,
+          })),
+        });
+      }
+
+      // Compute deltas between current and target positions (scales leverage by copyRatio)
       const deltas = this.deps.followerState.computeDeltas(targets, this.deps.risk);
 
       // Filter out dust deltas that are too small to trade
@@ -86,21 +143,81 @@ export class TradeExecutor {
         return;
       }
 
+      // Pre-filter tiny notionals to avoid minimum $10 exchange rejection
+      const aboveMinNotional = actionable.filter((delta) => {
+        const markPx = this.deps.metadataService.getMarkPrice(delta.coin) ?? delta.current?.entryPrice;
+        if (!markPx || markPx <= 0) {
+          this.log.debug(`Skipping ${delta.coin} due to missing/invalid mark price`);
+          return false;
+        }
+        const notional = Math.abs(delta.deltaSize) * markPx;
+        if (notional < MIN_ORDER_NOTIONAL_USD) {
+          this.log.debug(`Skipping ${delta.coin} due to small notional`, { notional: notional.toFixed(4) });
+          return false;
+        }
+        return true;
+      });
+
+      if (aboveMinNotional.length === 0) {
+        this.log.debug("No deltas above minimum notional threshold");
+        return;
+      }
+
       // Build orders for each actionable delta
-      const orders = actionable.map((delta) => this.buildOrder(delta));
+      const orders = aboveMinNotional
+        .map((delta) => this.buildOrder(delta))
+        // Filter out orders that round to zero size (too small to trade)
+        .filter((order) => {
+          const size = parseFloat(order.s);
+          if (size === 0 || !isFinite(size)) {
+            this.log.debug(`Skipping zero-size order for asset ${order.a}`);
+            return false;
+          }
+          return true;
+        });
+      
+      if (orders.length === 0) {
+        this.log.debug("No valid orders to submit after filtering");
+        return;
+      }
+      
       this.log.info("Submitting follower sync orders", {
         orders: orders.length,
         coins: orders.map((o) => o.a),
       });
 
       // Submit all orders as a batch (no grouping)
-      await this.deps.exchangeClient.order({
-        orders,
-        grouping: "na",
-      });
+      try {
+        const response = await this.deps.exchangeClient.order({
+          orders,
+          grouping: "na",
+        });
+        
+        // Log successful fills and any errors
+        const statuses = response.response.data.statuses;
+        const filled = statuses.filter((s) => "filled" in s || "resting" in s);
+        const errors = statuses.filter((s) => "error" in s);
+        
+        if (filled.length > 0) {
+          this.log.info("Orders executed successfully", { count: filled.length });
+        }
+        if (errors.length > 0) {
+          this.log.warn("Some orders failed", {
+            errorCount: errors.length,
+            errors: errors.map((e) => "error" in e ? e.error : "unknown"),
+          });
+        }
+      } catch (error: unknown) {
+        // Log the error but don't crash - margin errors are expected
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes("Insufficient margin")) {
+          this.log.warn("Order sync partially failed due to insufficient margin", { error: errorMessage });
+        } else {
+          this.log.error("Failed to synchronize follower with leader", { error });
+        }
+      }
     } catch (error) {
-      this.log.error("Failed to synchronize follower with leader", { error });
-      throw error;
+      this.log.error("Trade sync error", { error });
     } finally {
       this.syncing = false;
     }
@@ -122,8 +239,12 @@ export class TradeExecutor {
     const { risk, metadataService } = this.deps;
     const metadata = metadataService.requireByCoin(delta.coin);
 
-    // Use mark price, fallback to current entry price, then 0
-    const markPrice = metadataService.getMarkPrice(delta.coin) ?? delta.current?.entryPrice ?? 0;
+    // Use mark price, fallback to current entry price
+    const markPrice = metadataService.getMarkPrice(delta.coin) ?? delta.current?.entryPrice;
+
+    if (!markPrice || markPrice <= 0) {
+      throw new Error(`Cannot build order for ${delta.coin}: no valid mark price available`);
+    }
 
     const sideIsBuy = delta.deltaSize > 0;
 
@@ -157,11 +278,14 @@ export class TradeExecutor {
       return sameDirection && Math.abs(targetSize) < Math.abs(currentSize);
     })();
 
+    // Round price to match mark price precision (Hyperliquid's tick size)
+    const priceStr = roundToMarkPricePrecision(price, markPrice);
+
     // Build Hyperliquid order object
     return {
       a: metadata.assetId, // asset
       b: sideIsBuy, // is buy
-      p: price.toString(), // price
+      p: priceStr, // price
       s: size.toFixed(metadata.sizeDecimals), // size
       r: reduceOnly, // reduce-only flag
       t: {

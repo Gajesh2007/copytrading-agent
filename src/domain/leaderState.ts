@@ -9,6 +9,7 @@ import type { RiskConfig } from "../config/index.js";
 import { safeDivide } from "../utils/math.js";
 import type { PositionSnapshot } from "./types.js";
 import { TraderStateStore } from "./traderState.js";
+import type { MarketMetadataService } from "../services/marketMetadata.js";
 
 /**
  * Represents a target position that the follower should replicate.
@@ -16,14 +17,12 @@ import { TraderStateStore } from "./traderState.js";
 export interface TargetPosition {
   /** Trading pair */
   coin: string;
-  /** Target position size (already scaled by copyRatio) */
-  size: number;
-  /** Target notional value in USD */
-  notionalUsd: number;
-  /** Leader's entry price (used as reference for follower) */
-  impliedEntryPrice: number;
-  /** Leverage implied by this position relative to leader's account value */
-  impliedLeverage: number;
+  /** Leader's position size (raw, not scaled) */
+  leaderSize: number;
+  /** Leader's leverage for this position (notional / leader's account value) */
+  leaderLeverage: number;
+  /** Current mark price for the asset */
+  markPrice: number;
 }
 
 /**
@@ -35,26 +34,34 @@ export class LeaderState extends TraderStateStore {
   }
 
   /**
-   * Computes target positions for the follower by scaling leader positions.
+   * Computes target positions for the follower by analyzing leader's leverage.
    *
-   * Each leader position is scaled by the copyRatio and annotated with
-   * implied leverage relative to the leader's account value.
+   * Instead of copying absolute position sizes, we copy the LEVERAGE RATIO.
+   * This allows the follower to scale positions proportionally to their account size.
    *
-   * @param risk - Risk configuration including copyRatio
-   * @returns Array of target positions for the follower
+   * Uses CURRENT MARK PRICE for leverage calculations, not entry price.
+   * This ensures leverage is based on current market value.
+   *
+   * @param metadataService - Service providing current mark prices
+   * @returns Array of target positions with leader's leverage info
    */
-  computeTargets(risk: RiskConfig): TargetPosition[] {
+  computeTargets(metadataService: MarketMetadataService): TargetPosition[] {
     const metrics = this.getMetrics();
+    const leaderEquity = metrics.accountValueUsd;
+    
     return Array.from(this.getPositions().values()).map((position) => {
-      const scaledSize = position.size * risk.copyRatio;
-      const notionalUsd = Math.abs(scaledSize) * position.entryPrice;
-      const impliedLeverage = safeDivide(notionalUsd, metrics.accountValueUsd, 0);
+      // Use CURRENT mark price for leverage calculation
+      const markPrice = metadataService.getMarkPrice(position.coin) ?? position.entryPrice;
+      
+      // Calculate leader's current leverage for this position
+      const notionalUsd = Math.abs(position.size) * markPrice;
+      const leaderLeverage = safeDivide(notionalUsd, leaderEquity, 0);
+      
       return {
         coin: position.coin,
-        size: scaledSize,
-        notionalUsd,
-        impliedEntryPrice: position.entryPrice,
-        impliedLeverage,
+        leaderSize: position.size,
+        leaderLeverage,
+        markPrice,
       };
     });
   }

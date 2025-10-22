@@ -10,6 +10,7 @@ import { safeDivide } from "../utils/math.js";
 import type { PositionSnapshot } from "./types.js";
 import type { TargetPosition } from "./leaderState.js";
 import { TraderStateStore } from "./traderState.js";
+import { logger } from "../utils/logger.js";
 
 /**
  * Represents the difference between current and target position for a coin.
@@ -43,26 +44,24 @@ export class FollowerState extends TraderStateStore {
   }
 
   /**
-   * Computes position deltas by comparing current follower positions to target positions.
+   * Computes position deltas by mirroring leader's leverage scaled by copyRatio.
    *
-   * Applies risk limits:
-   * - maxLeverage: limits notional based on follower's account value
-   * - maxNotionalUsd: hard cap on position size
+   * Core logic:
+   * 1. Calculate target leverage = leader's leverage × copyRatio
+   * 2. Calculate target notional = target leverage × follower's equity
+   * 3. Apply risk caps (maxLeverage, maxNotionalUsd)
+   * 4. Convert notional to position size using mark price
    *
-   * Also generates close deltas for positions the follower holds but the leader does not.
+   * This ensures follower positions scale proportionally to follower's account size.
    *
-   * @param targets - Target positions from leader state
-   * @param risk - Risk configuration
+   * @param targets - Target positions with leader's leverage
+   * @param risk - Risk configuration including copyRatio
    * @returns Array of position deltas to execute
    */
   computeDeltas(targets: TargetPosition[], risk: RiskConfig): PositionDelta[] {
     const deltas: PositionDelta[] = [];
     const followerMetrics = this.getMetrics();
-    const equity = followerMetrics.accountValueUsd;
-
-    // Apply leverage cap: max notional = max leverage * account value
-    const leverageCapNotional = risk.maxLeverage * equity;
-    const globalNotionalCap = Math.min(risk.maxNotionalUsd, leverageCapNotional);
+    const followerEquity = followerMetrics.accountValueUsd;
 
     const targetCoins = new Set<string>();
 
@@ -71,11 +70,38 @@ export class FollowerState extends TraderStateStore {
       const current = this.getPositions().get(target.coin);
       targetCoins.add(target.coin);
 
-      const price = target.impliedEntryPrice;
-      // Limit notional to the minimum of target notional and global cap
-      const allowedNotional = Math.min(target.notionalUsd, globalNotionalCap);
-      const allowedSize = Math.sign(target.size) * safeDivide(allowedNotional, price, 0);
+      // Scale leader's leverage by copyRatio
+      const targetLeverage = target.leaderLeverage * risk.copyRatio;
+      
+      // Cap leverage to risk limits
+      const cappedLeverage = Math.min(targetLeverage, risk.maxLeverage);
+      
+      // Calculate target notional based on follower's equity
+      const targetNotional = cappedLeverage * followerEquity;
+      
+      // Apply hard notional cap
+      const allowedNotional = Math.min(targetNotional, risk.maxNotionalUsd);
+      
+      // Convert notional to size using current mark price
+      const price = target.markPrice;
+      const allowedSize = Math.sign(target.leaderSize) * safeDivide(allowedNotional, price, 0);
       const deltaSize = allowedSize - (current?.size ?? 0);
+      
+      // Log detailed sizing calculation (debug for cleanliness)
+      if (Math.abs(deltaSize) > 1e-6) {
+        logger.debug(`Position sizing for ${target.coin}`, {
+          leaderLeverage: target.leaderLeverage.toFixed(2) + "x",
+          copyRatio: risk.copyRatio,
+          targetLeverage: targetLeverage.toFixed(2) + "x",
+          cappedLeverage: cappedLeverage.toFixed(2) + "x",
+          followerEquity: "$" + followerEquity.toFixed(2),
+          allowedNotional: "$" + allowedNotional.toFixed(2),
+          markPrice: price,
+          targetSize: allowedSize.toFixed(4),
+          currentSize: (current?.size ?? 0).toFixed(4),
+          deltaSize: deltaSize.toFixed(4),
+        });
+      }
 
       deltas.push({
         coin: target.coin,

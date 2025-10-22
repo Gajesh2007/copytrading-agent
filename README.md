@@ -43,6 +43,26 @@ Automated copy trading agent that mirrors a leader account's positions onto your
    ```
    For quick iteration you can use `npm run dev`, which runs the TypeScript entrypoint directly via `ts-node`.
 
+## Docker
+
+Build the image and run with a bind-mounted `.env` file:
+
+```bash
+docker build -t copytrading-agent .
+docker run --rm \
+  --name copytrading-agent \
+  -v $(pwd)/.env:/app/.env:ro \
+  copytrading-agent
+```
+
+Alternatively, set envs via `--env-file` (dotenv in the app also loads .env if present):
+
+```bash
+docker run --rm \
+  --env-file ./.env \
+  copytrading-agent
+```
+
 ## Testing
 - No automated tests are bundled yet. Add your own checks or dry-run on Hyperliquid testnet before risking capital.
 
