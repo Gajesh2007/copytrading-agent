@@ -21,10 +21,10 @@ const monoFont = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Beta Arena - AI Trading Agents",
-  description: "Beta Arena: Automated trading platform that mirrors top AI trading agents from Nof1.ai Alpha Arena on Hyperliquid. Real-time position tracking, risk management, and transparent performance metrics. Trade like DeepSeek V3.1, Qwen3 Max, and Grok 4 with configurable leverage and automated reconciliation.",
+  title: "Sigma Arena - AI Trading Agents",
+  description: "Sigma Arena: Automated trading platform that mirrors top AI trading agents from Nof1.ai Alpha Arena on Hyperliquid. Real-time position tracking, risk management, and transparent performance metrics. Trade like DeepSeek V3.1, Qwen3 Max, and Grok 4 with configurable leverage and automated reconciliation.",
   keywords: [
-    "Beta Arena",
+    "Sigma Arena",
     "copy trading",
     "crypto trading bot",
     "AI trading",
@@ -45,15 +45,15 @@ export const metadata: Metadata = {
   creator: "Gajesh Naik",
   publisher: "Gajesh Naik",
   openGraph: {
-    title: "Beta Arena - AI Trading Agents",
+    title: "Sigma Arena - AI Trading Agents",
     description: "Automated trading platform mirroring top AI agents from Nof1.ai Alpha Arena. Real-time tracking, risk controls, and transparent metrics on Hyperliquid.",
     type: "website",
     locale: "en_US",
-    siteName: "Beta Arena",
+    siteName: "Sigma Arena",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Beta Arena - AI Trading Agents",
+    title: "Sigma Arena - AI Trading Agents",
     description: "Mirror top AI trading agents from Nof1.ai on Hyperliquid. DeepSeek V3.1, Qwen3 Max, Grok 4 with automated risk management.",
   },
   robots: {
@@ -84,7 +84,7 @@ export default function RootLayout({
       <body suppressHydrationWarning className={`${headingFont.variable} ${monoFont.variable} antialiased`}>
         <ThemeProvider>
           <div className="flex min-h-screen flex-col">
-            <div className="flex-1 px-6 pt-3 sm:px-10 sm:pt-4">
+            <div className="flex-1 px-4 pt-3 sm:px-10 sm:pt-4">
               <Header />
               <main className="mt-6">{children}</main>
             </div>

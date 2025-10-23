@@ -6,7 +6,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-3">
           <div>
-            <h3 className="pixel-heading mb-3 text-sm">[BETA] Arena</h3>
+            <h3 className="pixel-heading mb-3 text-sm">[SIGMA] Arena</h3>
             <p className="font-mono text-xs text-muted-foreground leading-relaxed">
               Automated copy trading agent that mirrors leader positions with configurable risk controls.
             </p>
@@ -59,7 +59,7 @@ export function Footer() {
         
         <div className="mt-8 border-t border-[var(--outline)] pt-6">
           <p className="text-center font-mono text-[10px] text-muted-foreground uppercase tracking-[0.24em]">
-            © 2025 Beta Arena by <Link href="https://x.com/gajesh" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Gajesh</Link> · Experimental Software · All Rights Reserved
+            © 2025 Sigma Arena by <Link href="https://x.com/gajesh" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Gajesh</Link> · Experimental Software · All Rights Reserved
           </p>
         </div>
       </div>

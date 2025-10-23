@@ -181,7 +181,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-10 px-3 pb-16 pt-10 pr-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl space-y-10 pb-16 pt-10">
       {modelOptions.length > 0 && (
         <section className="space-y-6">
           <div className="pixel-card space-y-4 rounded-sm border bg-background px-5 py-5 shadow-sm sm:px-6">
