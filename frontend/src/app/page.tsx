@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Copy,
   ExternalLink,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,8 @@ import {
 } from "@/data/dashboard";
 import { useVaultData } from "@/hooks/use-vault-data";
 import { usePositions } from "@/hooks/use-positions";
+import { DepositorsCard } from "@/components/depositors-card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 function formatCurrency(value: number, fractionDigits = 0) {
@@ -69,9 +72,7 @@ export default function HomePage() {
     return Array.from(entries, ([id, name]) => ({ id, name }));
   }, []);
 
-  const [selectedModel, setSelectedModel] = useState(
-    () => modelOptions[0]?.id ?? "",
-  );
+  const [selectedModel, setSelectedModel] = useState("");
 
   const { positionDiffs, loading: positionsLoading } = usePositions(selectedModel, 10000);
   
@@ -82,6 +83,14 @@ export default function HomePage() {
 
   const selectedVault = useMemo(() => {
     return vaults.find((vault) => vault.modelId === selectedModel);
+  }, [vaults, selectedModel]);
+
+  // Default to highest ROI vault on first load
+  useEffect(() => {
+    if (!selectedModel && vaults.length > 0) {
+      const best = [...vaults].sort((a, b) => (b.roiPercent - a.roiPercent))[0];
+      if (best) setSelectedModel(best.modelId);
+    }
   }, [vaults, selectedModel]);
 
   const sortedPositions = useMemo(() => {
@@ -253,15 +262,33 @@ export default function HomePage() {
                   <VaultMetric
                     label="Follower Equity"
                     value={formatCurrency(selectedVault.followerEquityUsd)}
+                    tooltip={
+                      <span>
+                        Current total value of all assets in the follower vault (in USD). This changes with deposits,
+                        withdrawals, and unrealized PnL.
+                      </span>
+                    }
                   />
                   <VaultMetric
                     label="Leader Equity"
                     value={formatCurrency(selectedVault.leaderEquityUsd)}
+                    tooltip={
+                      <span>
+                        Current wallet equity of the leader being mirrored (in USD). Follower sizing mirrors leader leverage,
+                        not absolute size.
+                      </span>
+                    }
                   />
                   <VaultMetric
                     label="Total ROI"
                     value={formatPercent(selectedVault.roiPercent)}
                     tone={selectedVault.roiPercent >= 0 ? "gain" : "loss"}
+                    tooltip={
+                      <span>
+                        Vault’s aggregate performance across all deposits. Individual ROI varies by deposit timing and
+                        subsequent PnL.
+                      </span>
+                    }
                   />
                 </div>
 
@@ -464,6 +491,9 @@ export default function HomePage() {
               </table>
             </CardContent>
           </Card>
+          {selectedVault && (
+            <DepositorsCard vaultAddress={selectedVault.vaultAddress} />
+          )}
         </div>
 
         <div className="w-full space-y-6">
@@ -495,14 +525,16 @@ export default function HomePage() {
       <Dialog open={!!openLogsVault} onOpenChange={(o) => {
         if (!o) setOpenLogsVault(null);
       }}>
-        <DialogContent className="sm:max-w-3xl">
+          <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="pixel-heading text-lg">Vault Logs</DialogTitle>
             <DialogDescription className="font-mono text-xs text-muted-foreground">
               {openLogsVault?.name}
             </DialogDescription>
           </DialogHeader>
-          {openLogsVault && <LogsViewer url={openLogsVault.logsUrl} />}
+          <div className="overflow-hidden">
+            {openLogsVault && <LogsViewer url={openLogsVault.logsUrl} />}
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -527,6 +559,7 @@ export default function HomePage() {
                 <li>• Code is not audited - use at your own risk</li>
                 <li>• Max leverage capped at 10x to reduce liquidation risk</li>
                 <li>• You may lose some or all of your deposit</li>
+                <li>• Your ROI depends on when you deposit, as your entry timing determines performance</li>
               </ul>
             </div>
             <p className="font-mono text-xs text-muted-foreground">
@@ -566,14 +599,27 @@ type VaultMetricProps = {
   label: string;
   value: string;
   tone?: "gain" | "loss";
+  tooltip?: React.ReactNode;
 };
 
-function VaultMetric({ label, value, tone }: VaultMetricProps) {
+function VaultMetric({ label, value, tone, tooltip }: VaultMetricProps) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="pixel-label text-[9px] text-muted-foreground uppercase tracking-[0.24em]">
-        {label}
-      </span>
+      <div className="flex items-center gap-1.5">
+        <span className="pixel-label text-[9px] text-muted-foreground uppercase tracking-[0.24em]">
+          {label}
+        </span>
+        {tooltip ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="text-muted-foreground hover:text-foreground" aria-label={`${label} tooltip`}>
+                <Info className="size-3" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent sideOffset={6}>{tooltip}</TooltipContent>
+          </Tooltip>
+        ) : null}
+      </div>
       <span
         className={cn(
           "font-mono text-sm",
@@ -681,9 +727,9 @@ function LogsViewer({ url }: LogsViewerProps) {
       </div>
       <div
         ref={containerRef}
-        className="h-[420px] overflow-auto rounded-sm border border-[var(--outline)] bg-black p-3"
+        className="h-[60vh] max-h-[520px] overflow-auto rounded-sm border border-[var(--outline)] bg-black p-3"
       >
-        <pre className="m-0 whitespace-pre-wrap font-mono text-[11px] leading-relaxed text-green-400">
+        <pre className="m-0 whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed text-green-400">
 {loading ? "loading…" : error ? error : logs}
         </pre>
       </div>
