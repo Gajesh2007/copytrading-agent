@@ -191,6 +191,7 @@ export default function HomePage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-10 pb-16 pt-10">
+      
       {modelOptions.length > 0 && (
         <section className="space-y-6">
           <div className="pixel-card space-y-4 rounded-sm border bg-background px-5 py-5 shadow-sm sm:px-6">
@@ -260,11 +261,11 @@ export default function HomePage() {
 
                 <div className="grid gap-4 sm:grid-cols-3">
                   <VaultMetric
-                    label="Follower Equity"
+                    label="Vault Equity"
                     value={formatCurrency(selectedVault.followerEquityUsd)}
                     tooltip={
                       <span>
-                        Current total value of all assets in the follower vault (in USD). This changes with deposits,
+                        Current total value of all assets in the vault (in USD). This changes with deposits,
                         withdrawals, and unrealized PnL.
                       </span>
                     }

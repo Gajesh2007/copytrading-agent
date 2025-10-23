@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import TotalEquityBadge from "@/components/total-equity-badge";
 
 export function Header() {
   const pathname = usePathname();
@@ -26,6 +27,7 @@ export function Header() {
         </Link>
       </nav>
       <div className="flex items-center gap-2">
+        <TotalEquityBadge />
         <div className="relative group">
           <Button asChild size="sm" className="rounded-none">
             <Link href="/">Launch Agent</Link>

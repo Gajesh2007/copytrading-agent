@@ -170,27 +170,45 @@ function generatePnlImage(params: {
 }
 
 async function shareOnTwitter({ text, imageDataUrl }: { text: string; imageDataUrl?: string }) {
+  // 1) Mobile: use native share sheet if available (attaches image)
   try {
-    if (imageDataUrl) {
-      const blob = await (await fetch(imageDataUrl)).blob();
-      const file = new File([blob], "sigmaarena_pnl.png", { type: "image/png" });
-      const nav = navigator as unknown as {
-        canShare?: (data: { files?: File[] }) => boolean;
-        share?: (data: { text?: string; files?: File[] }) => Promise<void>;
-      };
-      if (typeof nav.canShare === "function" && nav.canShare({ files: [file] }) && typeof nav.share === "function") {
+    const nav = navigator as Navigator & {
+      canShare?: (data?: any) => boolean;
+      share?: (data: any) => Promise<void>;
+    };
+    if (imageDataUrl && nav.share) {
+      const res = await fetch(imageDataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], "sigmaarena_pnl.png", { type: blob.type || "image/png" });
+      if (nav.canShare && nav.canShare({ files: [file] })) {
         await nav.share({ text, files: [file] });
         return;
       }
     }
   } catch {
-    // Fall through to twitter intent
+    // continue to clipboard + compose
   }
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const intentText = encodeURIComponent(text);
-  const url = encodeURIComponent(origin);
-  const tweetUrl = `https://twitter.com/intent/tweet?text=${intentText}&url=${url}`;
-  window.open(tweetUrl, "_blank", "noopener,noreferrer");
+
+  // 2) Desktop: copy image to clipboard (if available), then open composer with text only
+  if (
+    imageDataUrl &&
+    typeof window !== "undefined" &&
+    "clipboard" in navigator &&
+    "write" in (navigator.clipboard as any) &&
+    "ClipboardItem" in window
+  ) {
+    try {
+      const res = await fetch(imageDataUrl);
+      const blob = await res.blob();
+      const ClipboardItemCtor = (window as any).ClipboardItem;
+      const item = new ClipboardItemCtor({ [blob.type || "image/png"]: blob });
+      await (navigator.clipboard as any).write([item]);
+    } catch {
+      // if clipboard write fails, still open composer
+    }
+  }
+
+  window.open(`https://x.com/compose/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
 }
 
 export function DepositorsCard({ vaultAddress }: { vaultAddress: `0x${string}` }) {
