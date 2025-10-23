@@ -1,10 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function Footer() {
   return (
     <footer className="mt-16 border-t border-[var(--outline)] bg-background py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h3 className="pixel-heading mb-3 text-sm">[SIGMA] Arena</h3>
             <p className="font-mono text-xs text-muted-foreground leading-relaxed">
@@ -54,6 +55,24 @@ export function Footer() {
               This is experimental software. Trading carries risk. No guarantees on performance. 
               Use at your own risk.
             </p>
+          </div>
+
+          <div>
+            <h3 className="pixel-heading mb-3 text-sm">Execution Verified by</h3>
+            <Link 
+              href="https://docs.eigencloud.xyz/products/eigencompute/quickstart" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block hover:opacity-80 transition-opacity"
+            >
+              <Image 
+                src="/eigencloud-logo.png" 
+                alt="EigenCloud"
+                width={240}
+                height={56}
+                className="h-14 w-auto"
+              />
+            </Link>
           </div>
         </div>
         
