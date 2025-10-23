@@ -63,13 +63,16 @@ export default function HomePage() {
   const [openLogsVault, setOpenLogsVault] = useState<{ name: string; logsUrl: string } | null>(null);
 
   const modelOptions = useMemo(() => {
-    const entries = new Map<string, string>();
+    const entries = new Map<string, { name: string; comingSoon?: boolean }>();
     for (const vault of VAULT_AGENTS) {
       if (!entries.has(vault.modelId)) {
-        entries.set(vault.modelId, vault.model);
+        entries.set(vault.modelId, { name: vault.model, comingSoon: vault.comingSoon });
+      } else {
+        const existing = entries.get(vault.modelId)!;
+        entries.set(vault.modelId, { name: existing.name, comingSoon: existing.comingSoon || vault.comingSoon });
       }
     }
-    return Array.from(entries, ([id, name]) => ({ id, name }));
+    return Array.from(entries, ([id, v]) => ({ id, name: v.name, comingSoon: v.comingSoon }));
   }, []);
 
   const [selectedModel, setSelectedModel] = useState("");
@@ -142,21 +145,23 @@ export default function HomePage() {
     }
   }, [sortColumn, sortDirection]);
 
+  const navigableOptions = useMemo(() => modelOptions.filter((o: { id: string; name: string; comingSoon?: boolean }) => !o.comingSoon), [modelOptions]);
+
   const currentModelIndex = useMemo(() => {
-    return modelOptions.findIndex((opt) => opt.id === selectedModel);
-  }, [modelOptions, selectedModel]);
+    return navigableOptions.findIndex((opt) => opt.id === selectedModel);
+  }, [navigableOptions, selectedModel]);
 
   const goToPreviousModel = useCallback(() => {
     if (currentModelIndex > 0) {
-      setSelectedModel(modelOptions[currentModelIndex - 1].id);
+      setSelectedModel(navigableOptions[currentModelIndex - 1].id);
     }
-  }, [currentModelIndex, modelOptions]);
+  }, [currentModelIndex, navigableOptions]);
 
   const goToNextModel = useCallback(() => {
-    if (currentModelIndex < modelOptions.length - 1) {
-      setSelectedModel(modelOptions[currentModelIndex + 1].id);
+    if (currentModelIndex > -1 && currentModelIndex < navigableOptions.length - 1) {
+      setSelectedModel(navigableOptions[currentModelIndex + 1].id);
     }
-  }, [currentModelIndex, modelOptions]);
+  }, [currentModelIndex, navigableOptions]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -216,15 +221,28 @@ export default function HomePage() {
               </Button>
               <div className="flex flex-wrap items-center gap-2">
                 {modelOptions.map((option) => (
-                  <Button
-                    key={option.id}
-                    size="sm"
-                    variant={option.id === selectedModel ? "default" : "outline"}
-                    className="rounded-none"
-                    onClick={() => setSelectedModel(option.id)}
-                  >
-                    {option.name}
-                  </Button>
+                  option.comingSoon ? (
+                    <Button
+                      key={option.id}
+                      size="sm"
+                      variant="outline"
+                      className="rounded-none"
+                      disabled
+                    >
+                      {option.name}
+                      <span className="ml-2 pixel-label text-[9px]">Coming Soon</span>
+                    </Button>
+                  ) : (
+                    <Button
+                      key={option.id}
+                      size="sm"
+                      variant={option.id === selectedModel ? "default" : "outline"}
+                      className="rounded-none"
+                      onClick={() => setSelectedModel(option.id)}
+                    >
+                      {option.name}
+                    </Button>
+                  )
                 ))}
               </div>
               <Button
@@ -232,7 +250,7 @@ export default function HomePage() {
                 variant="outline"
                 className="rounded-none"
                 onClick={goToNextModel}
-                disabled={currentModelIndex === modelOptions.length - 1}
+                disabled={currentModelIndex === navigableOptions.length - 1 || currentModelIndex === -1}
                 aria-label="Next model"
               >
                 <ChevronRight className="size-4" />

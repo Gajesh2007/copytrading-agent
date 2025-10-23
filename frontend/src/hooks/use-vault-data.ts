@@ -31,7 +31,7 @@ export function useVaultData(refreshInterval = 10000) {
   const fetchData = useCallback(async () => {
     try {
       // Fetch Hyperliquid data for each vault AND leader
-      const vaultPromises = VAULT_AGENTS.map(async (vault) => {
+      const vaultPromises = VAULT_AGENTS.filter((v) => !('comingSoon' in v && v.comingSoon)).map(async (vault) => {
         try {
           // Fetch both follower vault and leader wallet data in parallel
           const [followerResponse, leaderResponse] = await Promise.all([

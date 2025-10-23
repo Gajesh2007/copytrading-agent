@@ -7,6 +7,8 @@ export interface VaultAgentSummary {
   leaderAddress: `0x${string}`;
   logsUrl: string;
   dashboardUrl: string;
+  /** If true, this model is not yet live and should be shown as Coming Soon */
+  comingSoon?: boolean;
 }
 
 export interface RiskSnapshot {
@@ -55,6 +57,28 @@ export const VAULT_AGENTS: VaultAgentSummary[] = [
     leaderAddress: "0x56d652e62998251b56c8398fb11fcfe464c08f84",
     logsUrl: "https://userapi-compute.eigencloud.xyz/logs/0x9abb8630488a02Ec3410C26785f661fa49218140",
     dashboardUrl: "https://nof1.ai/models/grok-4",
+  },
+  {
+    id: "inverse-gpt",
+    name: "Inverse GPT",
+    model: "Inverse GPT",
+    modelId: "inverse-gpt",
+    vaultAddress: "0x0000000000000000000000000000000000000000",
+    leaderAddress: "0x0000000000000000000000000000000000000000",
+    logsUrl: "#",
+    dashboardUrl: "#",
+    comingSoon: true,
+  },
+  {
+    id: "inverse-gemini",
+    name: "Inverse Gemini",
+    model: "Inverse Gemini",
+    modelId: "inverse-gemini",
+    vaultAddress: "0x0000000000000000000000000000000000000000",
+    leaderAddress: "0x0000000000000000000000000000000000000000",
+    logsUrl: "#",
+    dashboardUrl: "#",
+    comingSoon: true,
   },
 ];
 
