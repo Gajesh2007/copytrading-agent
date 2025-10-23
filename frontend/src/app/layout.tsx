@@ -80,8 +80,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className={`${headingFont.variable} ${monoFont.variable} antialiased`}>
+    <html lang="en">
+      <body className={`${headingFont.variable} ${monoFont.variable} antialiased`}>
         <ThemeProvider>
           <div className="flex min-h-screen flex-col">
             <div className="flex-1 px-4 pt-3 sm:px-10 sm:pt-4">
