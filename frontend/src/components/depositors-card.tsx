@@ -172,10 +172,7 @@ function generatePnlImage(params: {
 async function shareOnTwitter({ text, imageDataUrl }: { text: string; imageDataUrl?: string }) {
   // 1) Mobile: use native share sheet if available (attaches image)
   try {
-    const nav = navigator as Navigator & {
-      canShare?: (data?: any) => boolean;
-      share?: (data: any) => Promise<void>;
-    };
+    const nav = navigator as Navigator;
     if (imageDataUrl && nav.share) {
       const res = await fetch(imageDataUrl);
       const blob = await res.blob();
@@ -193,16 +190,15 @@ async function shareOnTwitter({ text, imageDataUrl }: { text: string; imageDataU
   if (
     imageDataUrl &&
     typeof window !== "undefined" &&
-    "clipboard" in navigator &&
-    "write" in (navigator.clipboard as any) &&
-    "ClipboardItem" in window
+    navigator.clipboard &&
+    typeof navigator.clipboard.write === "function" &&
+    typeof ClipboardItem !== "undefined"
   ) {
     try {
       const res = await fetch(imageDataUrl);
       const blob = await res.blob();
-      const ClipboardItemCtor = (window as any).ClipboardItem;
-      const item = new ClipboardItemCtor({ [blob.type || "image/png"]: blob });
-      await (navigator.clipboard as any).write([item]);
+      const item = new ClipboardItem({ [blob.type || "image/png"]: blob });
+      await navigator.clipboard.write([item]);
     } catch {
       // if clipboard write fails, still open composer
     }
