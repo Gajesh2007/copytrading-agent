@@ -6,6 +6,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
 
 const headingFont = Space_Mono({
   variable: "--font-heading",
@@ -107,6 +108,7 @@ export default function RootLayout({
             <Footer />
           </div>
           <Toaster richColors position="top-right" />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
