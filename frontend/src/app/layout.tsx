@@ -21,8 +21,57 @@ const monoFont = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eigen Arena",
-  description: "Eigen Arena - AI Trading Leaderboard",
+  title: "Beta Arena - AI Trading Agents",
+  description: "Beta Arena: Automated trading platform that mirrors top AI trading agents from Nof1.ai Alpha Arena on Hyperliquid. Real-time position tracking, risk management, and transparent performance metrics. Trade like DeepSeek V3.1, Qwen3 Max, and Grok 4 with configurable leverage and automated reconciliation.",
+  keywords: [
+    "Beta Arena",
+    "copy trading",
+    "crypto trading bot",
+    "AI trading",
+    "Hyperliquid",
+    "automated trading",
+    "Nof1.ai",
+    "Alpha Arena",
+    "DeepSeek V3.1",
+    "Qwen3 Max",
+    "Grok 4",
+    "algorithmic trading",
+    "DeFi",
+    "perpetual futures",
+    "trading vaults",
+    "AI agents",
+  ],
+  authors: [{ name: "Gajesh Naik" }],
+  creator: "Gajesh Naik",
+  publisher: "Gajesh Naik",
+  openGraph: {
+    title: "Beta Arena - AI Trading Agents",
+    description: "Automated trading platform mirroring top AI agents from Nof1.ai Alpha Arena. Real-time tracking, risk controls, and transparent metrics on Hyperliquid.",
+    type: "website",
+    locale: "en_US",
+    siteName: "Beta Arena",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Beta Arena - AI Trading Agents",
+    description: "Mirror top AI trading agents from Nof1.ai on Hyperliquid. DeepSeek V3.1, Qwen3 Max, Grok 4 with automated risk management.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    // Add your verification codes if needed
+    // google: 'your-google-verification-code',
+    // yandex: 'your-yandex-verification-code',
+  },
 };
 
 export default function RootLayout({

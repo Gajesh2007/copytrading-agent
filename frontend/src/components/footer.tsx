@@ -59,7 +59,7 @@ export function Footer() {
         
         <div className="mt-8 border-t border-[var(--outline)] pt-6">
           <p className="text-center font-mono text-[10px] text-muted-foreground uppercase tracking-[0.24em]">
-            © 2025 Gajesh Naik · Experimental Software · All Rights Reserved
+            © 2025 Beta Arena by <Link href="https://x.com/gajesh" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Gajesh</Link> · Experimental Software · All Rights Reserved
           </p>
         </div>
       </div>
