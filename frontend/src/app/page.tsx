@@ -181,7 +181,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-10 px-4 pb-16 pt-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl space-y-10 px-3 pb-16 pt-10 pr-4 sm:px-6 lg:px-8">
       {modelOptions.length > 0 && (
         <section className="space-y-6">
           <div className="pixel-card space-y-4 rounded-sm border bg-background px-5 py-5 shadow-sm sm:px-6">
@@ -322,7 +322,7 @@ export default function HomePage() {
       )}
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="space-y-6">
+        <div className="w-full space-y-6">
           <Card className="pixel-card rounded-sm border bg-background shadow-sm">
             <CardHeader className="gap-3">
               <CardTitle className="pixel-heading text-lg">
@@ -333,62 +333,62 @@ export default function HomePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="overflow-x-auto px-0">
-              <table className="table-grid w-full min-w-[640px] text-xs sm:text-sm">
+              <table className="table-grid w-full text-[11px] sm:text-xs">
                 <thead>
                   <tr className="text-left font-mono">
-                    <th className="px-4 py-3">
+                    <th className="px-2 py-2 sm:px-4 sm:py-3">
                       <button
                         onClick={() => handleSort("market")}
-                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                        className="flex items-center gap-0.5 hover:text-foreground transition-colors text-[10px] sm:text-xs"
                       >
                         Market
-                        <ArrowUpDown className="size-3" />
+                        <ArrowUpDown className="size-2.5 sm:size-3" />
                       </button>
                     </th>
-                    <th className="px-4 py-3">Side</th>
-                    <th className="px-4 py-3">
+                    <th className="px-2 py-2 sm:px-4 sm:py-3">Side</th>
+                    <th className="hidden md:table-cell px-2 py-2 sm:px-4 sm:py-3">
                       <button
                         onClick={() => handleSort("leaderSize")}
-                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                        className="flex items-center gap-0.5 hover:text-foreground transition-colors text-[10px] sm:text-xs"
                       >
-                        Leader Size ($)
-                        <ArrowUpDown className="size-3" />
+                        Leader ($)
+                        <ArrowUpDown className="size-2.5 sm:size-3" />
                       </button>
                     </th>
-                    <th className="px-4 py-3">
+                    <th className="px-2 py-2 sm:px-4 sm:py-3">
                       <button
                         onClick={() => handleSort("followerSize")}
-                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                        className="flex items-center gap-0.5 hover:text-foreground transition-colors text-[10px] sm:text-xs"
                       >
-                        Follower Size ($)
-                        <ArrowUpDown className="size-3" />
+                        Size ($)
+                        <ArrowUpDown className="size-2.5 sm:size-3" />
                       </button>
                     </th>
-                    <th className="px-4 py-3">
+                    <th className="px-2 py-2 sm:px-4 sm:py-3">
                       <button
                         onClick={() => handleSort("entry")}
-                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                        className="flex items-center gap-0.5 hover:text-foreground transition-colors text-[10px] sm:text-xs"
                       >
                         Entry
-                        <ArrowUpDown className="size-3" />
+                        <ArrowUpDown className="size-2.5 sm:size-3" />
                       </button>
                     </th>
-                    <th className="px-4 py-3">
+                    <th className="px-2 py-2 sm:px-4 sm:py-3">
                       <button
                         onClick={() => handleSort("mark")}
-                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                        className="flex items-center gap-0.5 hover:text-foreground transition-colors text-[10px] sm:text-xs"
                       >
                         Mark
-                        <ArrowUpDown className="size-3" />
+                        <ArrowUpDown className="size-2.5 sm:size-3" />
                       </button>
                     </th>
-                    <th className="px-4 py-3">
+                    <th className="px-2 py-2 sm:px-4 sm:py-3">
                       <button
                         onClick={() => handleSort("pnl")}
-                        className="flex items-center gap-1 hover:text-foreground transition-colors"
+                        className="flex items-center gap-0.5 hover:text-foreground transition-colors text-[10px] sm:text-xs"
                       >
                         PNL
-                        <ArrowUpDown className="size-3" />
+                        <ArrowUpDown className="size-2.5 sm:size-3" />
                       </button>
                     </th>
                   </tr>
@@ -396,51 +396,52 @@ export default function HomePage() {
                 <tbody>
                   {positionsLoading && sortedPositions.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center">
+                      <td colSpan={7} className="px-2 py-6 sm:px-4 sm:py-8 text-center">
                         <div className="flex items-center justify-center gap-2">
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
-                          <span className="font-mono text-sm text-muted-foreground">Loading positions...</span>
+                          <div className="h-3 w-3 sm:h-4 sm:w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+                          <span className="font-mono text-[11px] sm:text-sm text-muted-foreground">Loading...</span>
                         </div>
                       </td>
                     </tr>
                   ) : sortedPositions.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center font-mono text-sm text-muted-foreground">
+                      <td colSpan={7} className="px-2 py-6 sm:px-4 sm:py-8 text-center font-mono text-[11px] sm:text-sm text-muted-foreground">
                         No positions found
                       </td>
                     </tr>
                   ) : (
                     sortedPositions.map((row) => (
                       <tr key={row.coin} className="font-mono transition-colors hover:bg-accent/50">
-                      <td className="px-4 py-3">{row.coin}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-2 sm:px-4 sm:py-3">{row.coin}</td>
+                      <td className="px-2 py-2 sm:px-4 sm:py-3">
                         <span className={cn(
-                          "text-[10px] font-bold uppercase tracking-wider",
+                          "text-[9px] sm:text-[10px] font-bold uppercase tracking-wider",
                           row.side === "LONG" ? "text-emerald-600" : "text-rose-600"
                         )}>
                           {row.side}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="hidden md:table-cell px-2 py-2 sm:px-4 sm:py-3">
                         <span className={cn(
                           row.side === "LONG" ? "text-emerald-600" : "text-rose-600"
                         )}>
                           {formatCurrency(row.leaderNotionalUsd, 0)}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-2 sm:px-4 sm:py-3">
                         <span className={cn(
                           row.side === "LONG" ? "text-emerald-600" : "text-rose-600"
                         )}>
                           {formatCurrency(row.followerNotionalUsd, 0)}
                         </span>
                       </td>
-                      <td className="px-4 py-3">{formatCurrency(row.entryPrice, row.entryPrice < 10 ? 4 : 2)}</td>
-                      <td className="px-4 py-3">{formatCurrency(row.markPrice, row.markPrice < 10 ? 4 : 2)}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-2 sm:px-4 sm:py-3 text-[10px] sm:text-xs">{formatCurrency(row.entryPrice, row.entryPrice < 10 ? 4 : 2)}</td>
+                      <td className="px-2 py-2 sm:px-4 sm:py-3 text-[10px] sm:text-xs">{formatCurrency(row.markPrice, row.markPrice < 10 ? 4 : 2)}</td>
+                      <td className="px-2 py-2 sm:px-4 sm:py-3">
                         <div className="flex flex-col gap-0.5">
                           <span
                             className={cn(
+                              "text-[10px] sm:text-xs",
                               row.pnl === 0
                                 ? "text-muted-foreground"
                                 : row.pnl > 0
@@ -451,7 +452,7 @@ export default function HomePage() {
                             {row.pnl !== 0 && (row.pnl > 0 ? "+" : "")}
                             {formatCurrency(row.pnl, 0)}
                           </span>
-                          <span className="text-[11px] text-muted-foreground">
+                          <span className="text-[9px] sm:text-[11px] text-muted-foreground">
                             ({row.pnlPercent > 0 ? "+" : ""}{row.pnlPercent.toFixed(2)}%)
                           </span>
                         </div>
@@ -465,7 +466,7 @@ export default function HomePage() {
           </Card>
         </div>
 
-        <div className="space-y-6">
+        <div className="w-full space-y-6">
           <Card className="pixel-card rounded-sm border bg-background shadow-sm">
             <CardHeader className="gap-2">
               <CardTitle className="pixel-heading text-lg">
