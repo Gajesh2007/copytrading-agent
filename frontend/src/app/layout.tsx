@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
+import Script from "next/script";
 
 const headingFont = Space_Mono({
   variable: "--font-heading",
@@ -81,6 +82,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-J361SEM7KY"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-J361SEM7KY');
+          `}
+        </Script>
+      </head>
       <body className={`${headingFont.variable} ${monoFont.variable} antialiased`}>
         <ThemeProvider>
           <div className="flex min-h-screen flex-col">
