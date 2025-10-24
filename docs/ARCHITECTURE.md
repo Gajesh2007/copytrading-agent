@@ -144,6 +144,7 @@ Reduce-only behavior is set when closing or reducing existing positions to avoid
 | `RECONCILIATION_INTERVAL_MS` | No | `60000` | Reconciliation interval |
 | `REFRESH_ACCOUNT_INTERVAL_MS` | No | `5000` | Poll loop interval |
 | `AGGREGATE_FILLS` | No | `true` | Aggregate leader fills by time window |
+| `INVERSE` | No | `false` | If true, invert copy direction (long↔short) |
 | `LOG_LEVEL` | No | `info` | `debug` | `info` | `warn` | `error` |
 
 Example:
@@ -160,6 +161,7 @@ export MAX_SLIPPAGE_BPS=25
 export RECONCILIATION_INTERVAL_MS=60000
 export REFRESH_ACCOUNT_INTERVAL_MS=5000
 export AGGREGATE_FILLS=true
+export INVERSE=false
 export LOG_LEVEL=info
 ```
 
