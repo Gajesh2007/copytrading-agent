@@ -19,6 +19,7 @@ interface VaultData {
   followerEquityUsd: number;
   leaderEquityUsd: number;
   roiPercent: number;
+  leaderRoiPercent: number;
   logsUrl: string;
   dashboardUrl: string;
   risk_snapshot: RiskSnapshot;
@@ -59,6 +60,11 @@ export function useVaultData(refreshInterval = 10000) {
           const initialCapital = followerEquity - totalPnl;
           const roiPercent = initialCapital > 0 ? (totalPnl / initialCapital) * 100 : 0;
 
+          // Leader ROI % based on unrealized PnL
+          const leaderTotalPnl = leaderData?.totalPnl || 0;
+          const leaderInitialCapital = leaderEquity - leaderTotalPnl;
+          const leaderRoiPercent = leaderInitialCapital > 0 ? (leaderTotalPnl / leaderInitialCapital) * 100 : 0;
+
           return {
             modelId: vault.modelId,
             name: vault.name,
@@ -67,6 +73,7 @@ export function useVaultData(refreshInterval = 10000) {
             followerEquityUsd: followerEquity,
             leaderEquityUsd: leaderEquity,
             roiPercent,
+            leaderRoiPercent,
             logsUrl: vault.logsUrl,
             dashboardUrl: vault.dashboardUrl,
             risk_snapshot: vault.risk_snapshot,

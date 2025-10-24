@@ -87,10 +87,10 @@ export default function HomePage() {
     return vaults.find((vault) => vault.modelId === selectedModel);
   }, [vaults, selectedModel]);
 
-  // Default to highest ROI vault on first load
+  // Default to highest Leader PnL % vault on first load
   useEffect(() => {
     if (!selectedModel && vaults.length > 0) {
-      const best = [...vaults].sort((a, b) => (b.roiPercent - a.roiPercent))[0];
+      const best = [...vaults].sort((a, b) => b.leaderRoiPercent - a.leaderRoiPercent)[0];
       if (best) setSelectedModel(best.modelId);
     }
   }, [vaults, selectedModel]);
@@ -298,13 +298,12 @@ export default function HomePage() {
                     }
                   />
                   <VaultMetric
-                    label="Total ROI"
-                    value={formatPercent(selectedVault.roiPercent)}
-                    tone={selectedVault.roiPercent >= 0 ? "gain" : "loss"}
+                    label="Leader PnL %"
+                    value={formatPercent(selectedVault.leaderRoiPercent)}
+                    tone={selectedVault.leaderRoiPercent >= 0 ? "gain" : "loss"}
                     tooltip={
                       <span>
-                        Vault’s aggregate performance across all deposits. Individual ROI varies by deposit timing and
-                        subsequent PnL.
+                        Real-time ROI of the leader wallet being mirrored, based on unrealized PnL.
                       </span>
                     }
                   />
