@@ -273,7 +273,7 @@ export function DepositorsCard({ vaultAddress }: { vaultAddress: `0x${string}` }
                   </div>
                 </td>
                 <td className="px-2 py-2 sm:px-4 sm:py-3 text-right">${d.equity.toFixed(2)}</td>
-                <td className={"px-2 py-2 sm:px-4 sm:py-3 text-right " + (d.pnl >= 0 ? "text-emerald-600" : "text-rose-600")}>{d.pnl >= 0 ? "+" : ""}${d.pnl.toFixed(2)}</td>
+                <td className={"px-2 py-2 sm:px-4 sm:py-3 text-right " + (d.allTimePnl >= 0 ? "text-emerald-600" : "text-rose-600")}>{d.allTimePnl >= 0 ? "+" : ""}${d.allTimePnl.toFixed(2)}</td>
                 <td className={"px-2 py-2 sm:px-4 sm:py-3 text-right " + (d.roiPct >= 0 ? "text-emerald-600" : "text-rose-600")}>{d.roiPct >= 0 ? "+" : ""}{d.roiPct.toFixed(2)}%</td>
                 <td className="px-2 py-2 sm:px-4 sm:py-3">
                   <div className="flex items-center justify-end gap-1.5">
@@ -285,7 +285,7 @@ export function DepositorsCard({ vaultAddress }: { vaultAddress: `0x${string}` }
                           className="rounded-none"
                           aria-label="Share"
                           onClick={() => {
-                            setShareFor({ user: d.user, equity: d.equity, pnl: d.pnl, roiPct: d.roiPct });
+                            setShareFor({ user: d.user, equity: d.equity, pnl: d.allTimePnl, roiPct: d.roiPct });
                             setShareOpen(true);
                           }}
                         >

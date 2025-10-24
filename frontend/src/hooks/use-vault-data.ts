@@ -19,7 +19,7 @@ interface VaultData {
   followerEquityUsd: number;
   leaderEquityUsd: number;
   roiPercent: number;
-  leaderRoiPercent: number;
+  leaderAllTimeRoiPercent: number;
   logsUrl: string;
   dashboardUrl: string;
   risk_snapshot: RiskSnapshot;
@@ -51,6 +51,11 @@ export function useVaultData(refreshInterval = 10000) {
             ? await leaderResponse.json() 
             : null;
 
+          // Fetch depositors to derive leader all-time PnL %
+          const depositorRes = await fetch(`/api/vault/depositors?vault=${vault.vaultAddress}`, { cache: "no-store" });
+          const depositorJson = depositorRes.ok ? await depositorRes.json() as { followers?: Array<{ user: string; equity: number; pnl: number; allTimePnl: number }> } : { followers: [] };
+          const leaderRow = Array.isArray(depositorJson.followers) ? depositorJson.followers.find((f) => f.user === "Leader") : undefined;
+
           const leaderEquity = leaderData?.equity || 0;
           const followerEquity = followerData.equity || 0;
 
@@ -60,10 +65,12 @@ export function useVaultData(refreshInterval = 10000) {
           const initialCapital = followerEquity - totalPnl;
           const roiPercent = initialCapital > 0 ? (totalPnl / initialCapital) * 100 : 0;
 
-          // Leader ROI % based on unrealized PnL
-          const leaderTotalPnl = leaderData?.totalPnl || 0;
-          const leaderInitialCapital = leaderEquity - leaderTotalPnl;
-          const leaderRoiPercent = leaderInitialCapital > 0 ? (leaderTotalPnl / leaderInitialCapital) * 100 : 0;
+          // Leader all-time ROI % from vault depositors (creator)
+          const leaderAllTimePnl = leaderRow?.allTimePnl ?? 0;
+          const leaderCurrentPnl = leaderRow?.pnl ?? 0;
+          const leaderEquityForCalc = leaderRow?.equity ?? leaderEquity;
+          const leaderInitialCapital = leaderEquityForCalc - leaderCurrentPnl;
+          const leaderAllTimeRoiPercent = leaderInitialCapital > 0 ? (leaderAllTimePnl / leaderInitialCapital) * 100 : 0;
 
           return {
             modelId: vault.modelId,
@@ -73,7 +80,7 @@ export function useVaultData(refreshInterval = 10000) {
             followerEquityUsd: followerEquity,
             leaderEquityUsd: leaderEquity,
             roiPercent,
-            leaderRoiPercent,
+            leaderAllTimeRoiPercent,
             logsUrl: vault.logsUrl,
             dashboardUrl: vault.dashboardUrl,
             risk_snapshot: vault.risk_snapshot,

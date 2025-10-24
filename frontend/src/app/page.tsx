@@ -90,7 +90,7 @@ export default function HomePage() {
   // Default to highest Leader PnL % vault on first load
   useEffect(() => {
     if (!selectedModel && vaults.length > 0) {
-      const best = [...vaults].sort((a, b) => b.leaderRoiPercent - a.leaderRoiPercent)[0];
+      const best = [...vaults].sort((a, b) => b.leaderAllTimeRoiPercent - a.leaderAllTimeRoiPercent)[0];
       if (best) setSelectedModel(best.modelId);
     }
   }, [vaults, selectedModel]);
@@ -299,11 +299,11 @@ export default function HomePage() {
                   />
                   <VaultMetric
                     label="Leader PnL %"
-                    value={formatPercent(selectedVault.leaderRoiPercent)}
-                    tone={selectedVault.leaderRoiPercent >= 0 ? "gain" : "loss"}
+                    value={formatPercent(selectedVault.leaderAllTimeRoiPercent)}
+                    tone={selectedVault.leaderAllTimeRoiPercent >= 0 ? "gain" : "loss"}
                     tooltip={
                       <span>
-                        Real-time ROI of the leader wallet being mirrored, based on unrealized PnL.
+                        All-time ROI of the creator wallet mirrored by this vault, from Hyperliquid followers data.
                       </span>
                     }
                   />
@@ -620,6 +620,7 @@ type VaultMetricProps = {
 };
 
 function VaultMetric({ label, value, tone, tooltip }: VaultMetricProps) {
+  const [open, setOpen] = useState(false);
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-1.5">
@@ -627,9 +628,15 @@ function VaultMetric({ label, value, tone, tooltip }: VaultMetricProps) {
           {label}
         </span>
         {tooltip ? (
-          <Tooltip>
+          <Tooltip open={open} onOpenChange={setOpen} delayDuration={0}>
             <TooltipTrigger asChild>
-              <button className="text-muted-foreground hover:text-foreground" aria-label={`${label} tooltip`}>
+              <button
+                className="text-muted-foreground hover:text-foreground"
+                aria-label={`${label} info`}
+                aria-expanded={open}
+                onClick={() => setOpen((o) => !o)}
+                onBlur={() => setOpen(false)}
+              >
                 <Info className="size-3" />
               </button>
             </TooltipTrigger>
