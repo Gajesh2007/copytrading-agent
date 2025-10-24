@@ -34,6 +34,8 @@ import { useVaultData } from "@/hooks/use-vault-data";
 import { usePositions } from "@/hooks/use-positions";
 import { DepositorsCard } from "@/components/depositors-card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { RollingNumber, RollingCurrency, RollingPercent, RollingNumberWithSuffix } from "@/components/RollingNumber";
+import { ModelLogo, MODEL_LOGOS } from "@/components/ModelLogo";
 
 
 function formatCurrency(value: number, fractionDigits = 0) {
@@ -219,15 +221,17 @@ export default function HomePage() {
                 <ChevronLeft className="size-4" />
               </Button>
               <div className="flex flex-wrap items-center gap-2">
-                {modelOptions.map((option) => (
-                  option.comingSoon ? (
+                {modelOptions.map((option) => {
+                  const logo = MODEL_LOGOS[option.id];
+                  return option.comingSoon ? (
                     <Button
                       key={option.id}
                       size="sm"
                       variant="outline"
-                      className="rounded-none"
+                      className="rounded-none flex items-center gap-2"
                       disabled
                     >
+                      {logo && <ModelLogo modelId={option.id} size="sm" />}
                       {option.name}
                       <span className="ml-2 pixel-label text-[9px]">Coming Soon</span>
                     </Button>
@@ -236,13 +240,19 @@ export default function HomePage() {
                       key={option.id}
                       size="sm"
                       variant={option.id === selectedModel ? "default" : "outline"}
-                      className="rounded-none"
+                      className="rounded-none flex items-center gap-2"
                       onClick={() => setSelectedModel(option.id)}
+                      style={option.id === selectedModel && logo ? { 
+                        backgroundColor: logo.bgColor, 
+                        color: logo.textColor,
+                        borderColor: logo.bgColor
+                      } : undefined}
                     >
+                      {logo && <ModelLogo modelId={option.id} size="sm" />}
                       {option.name}
                     </Button>
-                  )
-                ))}
+                  );
+                })}
               </div>
               <Button
                 size="icon-sm"
@@ -269,17 +279,18 @@ export default function HomePage() {
           ) : selectedVault ? (
             <div className="pixel-card rounded-sm border bg-background p-6 shadow-sm">
               <div className="space-y-6">
-                <div>
+                <div className="flex items-center gap-3">
                   <span className="pixel-label text-[10px] text-muted-foreground uppercase tracking-[0.24em]">
                     {selectedVault.model}
                   </span>
-                  <h2 className="pixel-heading mt-1 text-2xl">{selectedVault.name}</h2>
+                  <ModelLogo modelId={selectedVault.modelId} size="md" />
                 </div>
+                <h2 className="pixel-heading mt-1 text-2xl">{selectedVault.name}</h2>
 
                 <div className="grid gap-4 sm:grid-cols-3">
                   <VaultMetric
                     label="Vault Equity"
-                    value={formatCurrency(selectedVault.followerEquityUsd)}
+                    value={<RollingCurrency value={selectedVault.followerEquityUsd} className="font-mono" />}
                     tooltip={
                       <span>
                         Current total value of all assets in the vault (in USD). This changes with deposits,
@@ -289,7 +300,7 @@ export default function HomePage() {
                   />
                   <VaultMetric
                     label="Leader Equity"
-                    value={formatCurrency(selectedVault.leaderEquityUsd)}
+                    value={<RollingCurrency value={selectedVault.leaderEquityUsd} className="font-mono" />}
                     tooltip={
                       <span>
                         Current wallet equity of the leader being mirrored (in USD). Follower sizing mirrors leader leverage,
@@ -299,7 +310,7 @@ export default function HomePage() {
                   />
                   <VaultMetric
                     label="Leader PnL %"
-                    value={formatPercent(selectedVault.leaderAllTimeRoiPercent)}
+                    value={<RollingPercent value={selectedVault.leaderAllTimeRoiPercent} className="font-mono" />}
                     tone={selectedVault.leaderAllTimeRoiPercent >= 0 ? "gain" : "loss"}
                     tooltip={
                       <span>
@@ -469,18 +480,22 @@ export default function HomePage() {
                         <span className={cn(
                           row.side === "LONG" ? "text-emerald-600" : "text-rose-600"
                         )}>
-                          {formatCurrency(row.leaderNotionalUsd, 0)}
+                          <RollingCurrency value={row.leaderNotionalUsd} className="font-mono" />
                         </span>
                       </td>
                       <td className="px-2 py-2 sm:px-4 sm:py-3">
                         <span className={cn(
                           row.side === "LONG" ? "text-emerald-600" : "text-rose-600"
                         )}>
-                          {formatCurrency(row.followerNotionalUsd, 0)}
+                          <RollingCurrency value={row.followerNotionalUsd} className="font-mono" />
                         </span>
                       </td>
-                      <td className="px-2 py-2 sm:px-4 sm:py-3 text-[10px] sm:text-xs">{formatCurrency(row.entryPrice, row.entryPrice < 10 ? 4 : 2)}</td>
-                      <td className="px-2 py-2 sm:px-4 sm:py-3 text-[10px] sm:text-xs">{formatCurrency(row.markPrice, row.markPrice < 10 ? 4 : 2)}</td>
+                      <td className="px-2 py-2 sm:px-4 sm:py-3 text-[10px] sm:text-xs">
+                        <RollingCurrency value={row.entryPrice} className="font-mono" decimals={row.entryPrice < 10 ? 4 : 2} />
+                      </td>
+                      <td className="px-2 py-2 sm:px-4 sm:py-3 text-[10px] sm:text-xs">
+                        <RollingCurrency value={row.markPrice} className="font-mono" decimals={row.markPrice < 10 ? 4 : 2} />
+                      </td>
                       <td className="px-2 py-2 sm:px-4 sm:py-3">
                         <div className="flex flex-col gap-0.5">
                           <span
@@ -494,10 +509,10 @@ export default function HomePage() {
                             )}
                           >
                             {row.pnl !== 0 && (row.pnl > 0 ? "+" : "")}
-                            {formatCurrency(row.pnl, 0)}
+                            <RollingCurrency value={row.pnl} className="font-mono" />
                           </span>
                           <span className="text-[9px] sm:text-[11px] text-muted-foreground">
-                            ({row.pnlPercent > 0 ? "+" : ""}{row.pnlPercent.toFixed(2)}%)
+                            ({row.pnlPercent > 0 ? "+" : ""}<RollingPercent value={row.pnlPercent} className="font-mono" decimals={2} />)
                           </span>
                         </div>
                       </td>
@@ -525,13 +540,13 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3 text-sm">
-                <RiskRow label="Copy Ratio" value={`${Math.round(((selectedVault?.risk_snapshot.copyRatio ?? 0) * 100))}%`} />
-                <RiskRow label="Max Leverage" value={`${(selectedVault?.risk_snapshot.maxLeverage ?? 0).toFixed(1)}x`} />
-                <RiskRow label="Max Notional" value={formatCurrency(selectedVault?.risk_snapshot.maxNotionalUsd ?? 0)} />
-                <RiskRow label="Slippage Guard" value={`${selectedVault?.risk_snapshot.slippageBps ?? 0} bps`} />
+                <RiskRow label="Copy Ratio" value={<RollingPercent value={(selectedVault?.risk_snapshot.copyRatio ?? 0) * 100} className="font-mono" decimals={0} />} />
+                <RiskRow label="Max Leverage" value={<RollingNumberWithSuffix value={selectedVault?.risk_snapshot.maxLeverage ?? 0} className="font-mono" suffix="x" decimals={1} />} />
+                <RiskRow label="Max Notional" value={<RollingCurrency value={selectedVault?.risk_snapshot.maxNotionalUsd ?? 0} className="font-mono" />} />
+                <RiskRow label="Slippage Guard" value={<RollingNumberWithSuffix value={selectedVault?.risk_snapshot.slippageBps ?? 0} className="font-mono" suffix=" bps" />} />
                 <RiskRow
                   label="Refresh Interval"
-                  value={`${Math.round(((selectedVault?.risk_snapshot.refreshAccountIntervalMs ?? 0) / 1000))}s`}
+                  value={<RollingNumberWithSuffix value={(selectedVault?.risk_snapshot.refreshAccountIntervalMs ?? 0) / 1000} className="font-mono" suffix="s" decimals={0} />}
                 />
               </div>
             </CardContent>
@@ -614,7 +629,7 @@ export default function HomePage() {
 
 type VaultMetricProps = {
   label: string;
-  value: string;
+  value: string | React.ReactNode;
   tone?: "gain" | "loss";
   tooltip?: React.ReactNode;
 };
@@ -659,7 +674,7 @@ function VaultMetric({ label, value, tone, tooltip }: VaultMetricProps) {
 
 type RiskRowProps = {
   label: string;
-  value: string;
+  value: string | React.ReactNode;
 };
 
 function RiskRow({ label, value }: RiskRowProps) {

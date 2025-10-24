@@ -43,7 +43,7 @@ Portal: [SigmaArena](https://sigmaarena.com)
    ```
 2. Copy the sample environment and fill in your keys:
    ```bash
-   cp examples/.env.example .env
+   cp .env.example .env
    ```
    - `LEADER_ADDRESS`: wallet you want to mirror.
    - `FOLLOWER_PRIVATE_KEY`: private key for your follower API wallet.
