@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { VAULT_AGENTS } from "@/data/dashboard";
+import { VAULT_AGENTS, type RiskSnapshot } from "@/data/dashboard";
 
 interface HyperliquidVaultData {
   vaultAddress: string;
@@ -21,6 +21,7 @@ interface VaultData {
   roiPercent: number;
   logsUrl: string;
   dashboardUrl: string;
+  risk_snapshot: RiskSnapshot;
 }
 
 export function useVaultData(refreshInterval = 10000) {
@@ -68,6 +69,7 @@ export function useVaultData(refreshInterval = 10000) {
             roiPercent,
             logsUrl: vault.logsUrl,
             dashboardUrl: vault.dashboardUrl,
+            risk_snapshot: vault.risk_snapshot,
           };
         } catch (err) {
           console.error(`Error fetching vault ${vault.vaultAddress}:`, err);

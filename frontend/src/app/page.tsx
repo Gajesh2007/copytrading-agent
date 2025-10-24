@@ -28,7 +28,6 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import {
-  RISK_SNAPSHOT,
   VAULT_AGENTS,
 } from "@/data/dashboard";
 import { useVaultData } from "@/hooks/use-vault-data";
@@ -527,13 +526,13 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3 text-sm">
-                <RiskRow label="Copy Ratio" value={`${Math.round(RISK_SNAPSHOT.copyRatio * 100)}%`} />
-                <RiskRow label="Max Leverage" value={`${RISK_SNAPSHOT.maxLeverage.toFixed(1)}x`} />
-                <RiskRow label="Max Notional" value={formatCurrency(RISK_SNAPSHOT.maxNotionalUsd)} />
-                <RiskRow label="Slippage Guard" value={`${RISK_SNAPSHOT.slippageBps} bps`} />
+                <RiskRow label="Copy Ratio" value={`${Math.round(((selectedVault?.risk_snapshot.copyRatio ?? 0) * 100))}%`} />
+                <RiskRow label="Max Leverage" value={`${(selectedVault?.risk_snapshot.maxLeverage ?? 0).toFixed(1)}x`} />
+                <RiskRow label="Max Notional" value={formatCurrency(selectedVault?.risk_snapshot.maxNotionalUsd ?? 0)} />
+                <RiskRow label="Slippage Guard" value={`${selectedVault?.risk_snapshot.slippageBps ?? 0} bps`} />
                 <RiskRow
                   label="Refresh Interval"
-                  value={`${Math.round(RISK_SNAPSHOT.refreshAccountIntervalMs / 1000)}s`}
+                  value={`${Math.round(((selectedVault?.risk_snapshot.refreshAccountIntervalMs ?? 0) / 1000))}s`}
                 />
               </div>
             </CardContent>
