@@ -28,6 +28,8 @@ export interface RiskConfig {
   maxNotionalUsd: number;
   /** Maximum slippage in basis points (e.g., 25 = 0.25%) */
   maxSlippageBps: number;
+  /** When true, invert leader direction (long->short, short->long) */
+  inverse: boolean;
 }
 
 /**
@@ -128,6 +130,7 @@ export function loadConfig(): CopyTradingConfig {
       maxLeverage: optionalNumberEnv("MAX_LEVERAGE", 10),
       maxNotionalUsd: optionalNumberEnv("MAX_NOTIONAL_USD", 250_000),
       maxSlippageBps: optionalNumberEnv("MAX_SLIPPAGE_BPS", 25),
+      inverse: optionalBooleanEnv("INVERSE", false),
     },
     reconciliationIntervalMs: optionalNumberEnv("RECONCILIATION_INTERVAL_MS", 60_000),
     refreshAccountIntervalMs: optionalNumberEnv("REFRESH_ACCOUNT_INTERVAL_MS", 5_000),

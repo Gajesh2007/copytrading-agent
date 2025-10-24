@@ -84,7 +84,9 @@ export class FollowerState extends TraderStateStore {
       
       // Convert notional to size using current mark price
       const price = target.markPrice;
-      const allowedSize = Math.sign(target.leaderSize) * safeDivide(allowedNotional, price, 0);
+      // Determine direction: mirror leader, or invert if configured
+      const direction = Math.sign(target.leaderSize) * (risk.inverse ? -1 : 1);
+      const allowedSize = direction * safeDivide(allowedNotional, price, 0);
       const deltaSize = allowedSize - (current?.size ?? 0);
       
       // Log detailed sizing calculation (debug for cleanliness)
@@ -92,6 +94,7 @@ export class FollowerState extends TraderStateStore {
         logger.debug(`Position sizing for ${target.coin}`, {
           leaderLeverage: target.leaderLeverage.toFixed(2) + "x",
           copyRatio: risk.copyRatio,
+          inverse: !!risk.inverse,
           targetLeverage: targetLeverage.toFixed(2) + "x",
           cappedLeverage: cappedLeverage.toFixed(2) + "x",
           followerEquity: "$" + followerEquity.toFixed(2),
